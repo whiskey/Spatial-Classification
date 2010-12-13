@@ -22,11 +22,11 @@ public class Workbench {
 			exception.printStackTrace();
 		}
 		*/
-		File lake = new File(projectRootPath+"/data/Soils.dat.arff");
+		File lake = new File(projectRootPath+"/data/Pollution.dat.arff");
 		System.out.println(lake.getAbsolutePath());
 		if(lake.exists()){
 			DataAnalyzer da = new DataAnalyzer(lake.getAbsolutePath());
-			for(int c=0; c<9;c++){
+			for(int c=0; c<8;c++){
 				da.trainClassifiers(c);
 			}
 		}

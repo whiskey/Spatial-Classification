@@ -16,6 +16,7 @@ import weka.classifiers.meta.AdaBoostM1;
 import weka.classifiers.meta.Bagging;
 import weka.classifiers.trees.J48;
 import weka.core.Instances;
+import weka.core.UnsupportedAttributeTypeException;
 import weka.core.converters.ConverterUtils.DataSource;
 
 /**
@@ -149,6 +150,9 @@ public class DataAnalyzer implements Runnable {
 			logger.config(log);
 			
 			classifier.buildClassifier(data);
+		}catch(UnsupportedAttributeTypeException exception){
+			//exception.printStackTrace();
+			logger.warning(classifier.getClass()+" can't handle numeric class attributes");
 		}catch(Exception exception){
 			exception.printStackTrace();
 		}
