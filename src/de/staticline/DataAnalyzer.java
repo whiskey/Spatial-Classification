@@ -25,15 +25,15 @@ import weka.core.converters.ConverterUtils.DataSource;
  * @author Carsten Witzke
  */
 public class DataAnalyzer implements Runnable {
-	private DataSource 			source;
-	//private Loader 			loader; //used for incremental training
-	private String				dataURL;
-	
 	protected Instances 		data;
 	protected Classifier 		classifier = new IBk(); //default classifier
 	protected String			options = "";
 	protected static Logger		logger;
 	
+	private DataSource 			source;
+	//private Loader 			loader; //used for incremental training
+	private String				dataURL;
+
 	
 	public static final int DEFAULT_CLASSINDEX = -1;
 	
@@ -107,7 +107,23 @@ public class DataAnalyzer implements Runnable {
 	}
 	*/
 	
-	public void trainClassifiers(int classificationEngine){
+	/**
+	 * Trains a classification engine with a previously loaded data set.
+	 * @param classificationEngine the classification engine (=algorithm)
+	 * <ol>
+	 *  <li>Naive Bayes</li>
+	 *  <li>Logistic</li>
+	 *  <li>SMO (RBF)</li>
+	 *  <li>IBk</li>
+	 *  <li>AdaBoost M1</li>
+	 *  <li>Bagging</li>
+	 *  <li>J48</li>
+	 * </ol>
+	 * @param hpo - hyper parameter optimization enabled? false: use Weka's
+	 * default parameters for each classification engine; true: currently
+	 * not implemented
+	 */
+	public void trainClassifiers(int classificationEngine, boolean hpo){
 		try{
 			switch(classificationEngine){
 			case 0:
@@ -139,8 +155,11 @@ public class DataAnalyzer implements Runnable {
 				logger.warning("Unsupported classification engine choosen.");
 				break;
 			}
-			//TODO: hyper parameter optimization
-			//classifier.setOptions(Utils.splitOptions(options));
+			//trigger hpo
+			if(hpo){
+				//TODO: hyper parameter optimization
+				//classifier.setOptions(Utils.splitOptions(options));
+			}
 			
 			//some output
 			String log = "Running "+classifier.getClass().toString()+"with default options: ";

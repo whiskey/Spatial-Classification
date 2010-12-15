@@ -27,7 +27,7 @@ public class Workbench {
 		if(lake.exists()){
 			DataAnalyzer da = new DataAnalyzer(lake.getAbsolutePath());
 			for(int c=0; c<8;c++){
-				da.trainClassifiers(c);
+				da.trainClassifiers(c, false);
 			}
 		}
 	}
