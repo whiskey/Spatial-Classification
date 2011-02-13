@@ -1,7 +1,10 @@
+## files
 .DS_Store
 .classpath
 .project
 .settings
 logfile.*
+*.arff
 
+## folders
 bin
