@@ -1,4 +1,4 @@
-package de.staticline;
+package de.staticline.analyze;
 
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
@@ -28,15 +28,18 @@ public class DataAnalyzer implements Runnable {
 	protected Instances 		data;
 	protected Classifier 		classifier = new IBk(); //default classifier
 	protected String			options = "";
-	protected static Logger		logger;
-	
+	private static Logger		logger;
+
 	private DataSource 			source;
 	//private Loader 			loader; //used for incremental training
 	private String				dataURL;
 
-	
+	/**
+	 * Which is the class index of the data source?
+	 * Default (<code>-1</code>) is the last column of the data set.
+	 */
 	public static final int DEFAULT_CLASSINDEX = -1;
-	
+
 	/**
 	 * 
 	 * Uses the default class-index of an arff: the last attribute.
@@ -45,7 +48,7 @@ public class DataAnalyzer implements Runnable {
 	public DataAnalyzer(String dataFileURL){
 		this(dataFileURL, DataAnalyzer.DEFAULT_CLASSINDEX);
 	}
-	
+
 	/**
 	 * 
 	 * Manually sets the class-index.
@@ -68,13 +71,13 @@ public class DataAnalyzer implements Runnable {
 			}else{
 				data.setClassIndex(classIndex);
 			}
-			
+
 			//setup logger
 			Handler fh = new FileHandler("logfile.txt");
 			fh.setFormatter(new SimpleFormatter());
-			logger = Logger.getLogger("de.staticline.spatial");
-			logger.addHandler(fh);
-			logger.setLevel(Level.ALL);
+			DataAnalyzer.logger = Logger.getLogger("de.staticline.spatial");
+			DataAnalyzer.logger.addHandler(fh);
+			DataAnalyzer.logger.setLevel(Level.ALL);
 		}catch(Exception exception){
 			exception.printStackTrace();
 		}
@@ -85,28 +88,28 @@ public class DataAnalyzer implements Runnable {
 	 */
 	@Override
 	public void run() {
-		
+
 	}
-	
+
 	/*
 	private void trainUpdateableClassifiers(){
 		try{
 			classifier.buildClassifier(data);
 			//current (data) instance
 			Instance instance;
-			
+
 			while((instance = loader.getNextInstance(data)) != null){
 				//All Known Implementing Classes:
-				//AODE, IB1, IBk, KStar, LWL, NaiveBayesUpdateable, 
+				//AODE, IB1, IBk, KStar, LWL, NaiveBayesUpdateable,
 				//NNge, RacedIncrementalLogitBoost, Winnow
-				
+
 			}
 		}catch (Exception exception){
 			exception.printStackTrace();
 		}
 	}
-	*/
-	
+	 */
+
 	/**
 	 * Trains a classification engine with a previously loaded data set.
 	 * @param classificationEngine the classification engine (=algorithm)
@@ -152,7 +155,7 @@ public class DataAnalyzer implements Runnable {
 				break;
 			default:
 				System.err.println("Unsupported classification engine choosen.");
-				logger.warning("Unsupported classification engine choosen.");
+				DataAnalyzer.logger.warning("Unsupported classification engine choosen.");
 				break;
 			}
 			//trigger hpo
@@ -160,18 +163,18 @@ public class DataAnalyzer implements Runnable {
 				//TODO: hyper parameter optimization
 				//classifier.setOptions(Utils.splitOptions(options));
 			}
-			
+
 			//some output
 			String log = "Running "+classifier.getClass().toString()+"with default options: ";
 			for(String option : classifier.getOptions()){
 				log += option+" ";
 			}
-			logger.config(log);
-			
+			DataAnalyzer.logger.config(log);
+
 			classifier.buildClassifier(data);
 		}catch(UnsupportedAttributeTypeException exception){
 			//exception.printStackTrace();
-			logger.warning(classifier.getClass()+" can't handle numeric class attributes");
+			DataAnalyzer.logger.warning(classifier.getClass()+" can't handle numeric class attributes");
 		}catch(Exception exception){
 			exception.printStackTrace();
 		}

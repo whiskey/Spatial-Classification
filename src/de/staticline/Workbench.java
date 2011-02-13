@@ -2,6 +2,8 @@ package de.staticline;
 
 import java.io.File;
 
+import de.staticline.data.GeoEASManager;
+
 
 
 /**
@@ -13,23 +15,18 @@ public class Workbench {
 
 	public static void main(String[] args) {
 		String projectRootPath = System.getProperty("user.dir");
-		/*
+		File lake = new File(projectRootPath+"/data/Lake.dat");//FIXME: DEBUG
 		//data converter
 		GeoEASManager geom = new GeoEASManager();
-		try{
-			geom.convertToARFF(lake);
-		}catch(Exception exception){
-			exception.printStackTrace();
-		}
-		*/
-		File lake = new File(projectRootPath+"/data/Pollution.dat.arff");
-		System.out.println(lake.getAbsolutePath());
-		if(lake.exists()){
-			DataAnalyzer da = new DataAnalyzer(lake.getAbsolutePath());
-			for(int c=0; c<8;c++){
-				da.trainClassifiers(c, false);
-			}
-		}
+		geom.convertToARFF(lake);
+
+		//		System.out.println(lake.getAbsolutePath());
+		//		if(lake.exists()){
+		//			DataAnalyzer da = new DataAnalyzer(lake.getAbsolutePath());
+		//			for(int c=0; c<8;c++){
+		//				da.trainClassifiers(c, false);
+		//			}
+		//		}
 	}
 
 }
