@@ -2,9 +2,9 @@ package de.staticline;
 
 import java.io.File;
 
-import de.staticline.data.GeoEASManager;
-
-
+import de.staticline.analyze.DataAnalyzer;
+import de.staticline.analyze.EClassifiers;
+import de.staticline.data.DataFileFilter;
 
 /**
  * Quick and dirty testing and deveopent class
@@ -12,21 +12,26 @@ import de.staticline.data.GeoEASManager;
  * @author Carsten Witzke
  */
 public class Workbench {
-
-	public static void main(String[] args) {
-		String projectRootPath = System.getProperty("user.dir");
-		File lake = new File(projectRootPath+"/data/Lake.dat");//FIXME: DEBUG
-		//data converter
-		GeoEASManager geom = new GeoEASManager();
-		geom.convertToARFF(lake);
-
-		//		System.out.println(lake.getAbsolutePath());
-		//		if(lake.exists()){
-		//			DataAnalyzer da = new DataAnalyzer(lake.getAbsolutePath());
-		//			for(int c=0; c<8;c++){
-		//				da.trainClassifiers(c, false);
-		//			}
-		//		}
+	private static final String ROOT_PATH = System.getProperty("user.dir");
+	private static final String DATA_PATH = ROOT_PATH + "/data/raw";
+	private static final String ARFF_PATH = ROOT_PATH + "/data/arff"; 
+	
+	public static void main(final String[] args) {
+		//--- convert data files to arff
+		//final GeoEASManager geom = new GeoEASManager();
+		
+		//FIXME: remove next 2 lines after debug
+		//final File file = new File(ROOT_PATH+"/data/raw/Lake.dat");
+		//geom.convertToARFF(file);
+		
+		
+		//--- anylyze data
+		for(final File f : new File(ARFF_PATH).listFiles(new DataFileFilter("arff"))){
+			System.out.println(f.getAbsolutePath());
+			final DataAnalyzer da = new DataAnalyzer(f.getAbsolutePath());
+			for(final EClassifiers c : EClassifiers.values()){
+				da.trainClassifiers(c, false);
+			}
+		}
 	}
-
 }

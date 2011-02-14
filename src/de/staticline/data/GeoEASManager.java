@@ -21,7 +21,10 @@ import java.util.logging.SimpleFormatter;
  */
 public class GeoEASManager{
 	private static Logger logger;
-
+	private static final String ROOT_PATH = System.getProperty("user.dir");
+	private static final String DATA_PATH = ROOT_PATH + "/data/raw";
+	private static final File dataFolder = new File(DATA_PATH);
+	
 	public GeoEASManager(){
 		//setup logger
 		try {
@@ -36,6 +39,18 @@ public class GeoEASManager{
 			exception.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Converts all files with the default extension (<code>.dat</code>)
+	 * to their ARFF equivalents.
+	 */
+	public final void convertAllFilesToARFF(){
+		if(dataFolder.isDirectory()){
+			for(final File file : dataFolder.listFiles(new DataFileFilter())){
+				convertToARFF(file);
+			}
+		}
+	}
 
 	/**
 	 * Converts GeoEAS files into weka's arff format.
@@ -48,7 +63,7 @@ public class GeoEASManager{
 			final InputStreamReader in = new InputStreamReader(fis);
 			final BufferedReader br = new BufferedReader(in);
 			//writing the new arff
-			final File arff = new File(dataFile.getAbsolutePath()+".arff");
+			final File arff = new File(ROOT_PATH+"/data/arff/"+dataFile.getName()+".arff");
 			final FileWriter fw = new FileWriter(arff, false);
 			final BufferedWriter bwriter = new BufferedWriter(fw);
 
@@ -78,7 +93,8 @@ public class GeoEASManager{
 					if(tokens != numAttributes.intValue()){
 						System.out.println(	"Invalid data format? I have "+numAttributes+
 								" but got "+tokens+" tokens. Skipping file!");
-						GeoEASManager.logger.log(Level.SEVERE, "Invalid file structure in file "+dataFile.getAbsolutePath());
+						GeoEASManager.logger.log(Level.SEVERE, 
+								"Invalid file structure in file "+dataFile.getAbsolutePath());
 						return;
 					}
 					//handle data
@@ -97,7 +113,7 @@ public class GeoEASManager{
 				//finish
 				bwriter.close();
 				//stats
-				System.out.println("data rows:  "+numDataRows);
+				System.out.println(dataFile.getName()+" data rows:  "+numDataRows);
 			}
 		}catch(final Exception exception){
 			exception.printStackTrace();

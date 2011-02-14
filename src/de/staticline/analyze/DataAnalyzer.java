@@ -7,17 +7,12 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.bayes.NaiveBayes;
-import weka.classifiers.functions.Logistic;
-import weka.classifiers.functions.RBFNetwork;
-import weka.classifiers.functions.SMO;
 import weka.classifiers.lazy.IBk;
-import weka.classifiers.meta.AdaBoostM1;
-import weka.classifiers.meta.Bagging;
-import weka.classifiers.trees.J48;
 import weka.core.Instances;
 import weka.core.UnsupportedAttributeTypeException;
 import weka.core.converters.ConverterUtils.DataSource;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.NumericToNominal;
 
 /**
  * Data analyzer class for handling classification and hyper-parameter-search tasks.
@@ -25,14 +20,14 @@ import weka.core.converters.ConverterUtils.DataSource;
  * @author Carsten Witzke
  */
 public class DataAnalyzer implements Runnable {
-	protected Instances 		data;
-	protected Classifier 		classifier = new IBk(); //default classifier
-	protected String			options = "";
-	private static Logger		logger;
+	private Classifier 		classifier = new IBk(); //default classifier
+	private final String			options = "";
+	private Instances 		data;
+	private static Logger	logger;
 
-	private DataSource 			source;
+	private DataSource 		source;
 	//private Loader 			loader; //used for incremental training
-	private String				dataURL;
+	private String			dataURL;
 
 	/**
 	 * Which is the class index of the data source?
@@ -45,7 +40,7 @@ public class DataAnalyzer implements Runnable {
 	 * Uses the default class-index of an arff: the last attribute.
 	 * @param dataFileURL String to a Weka data-source. Could be 'arff', 'csv', ...
 	 */
-	public DataAnalyzer(String dataFileURL){
+	public DataAnalyzer(final String dataFileURL){
 		this(dataFileURL, DataAnalyzer.DEFAULT_CLASSINDEX);
 	}
 
@@ -55,7 +50,7 @@ public class DataAnalyzer implements Runnable {
 	 * @param dataFileURL String to a Weka data-source. Could be 'arff', 'csv', ...
 	 * @param classIndex the index of the class attribute
 	 */
-	public DataAnalyzer(String dataFileURL, int classIndex){
+	public DataAnalyzer(final String dataFileURL, final int classIndex){
 		try{
 			dataURL = dataFileURL;
 			source = new DataSource(dataURL);
@@ -65,20 +60,33 @@ public class DataAnalyzer implements Runnable {
 			//incremental training not implemented for needed classifiers :(
 			//see: http://weka.wikispaces.com/Use+WEKA+in+your+Java+code#toc13
 			data = source.getDataSet();
+			
 			//set class index
+			int cIndex = classIndex;
 			if(classIndex == DataAnalyzer.DEFAULT_CLASSINDEX){
-				data.setClassIndex(data.numAttributes()-1);
+				cIndex = data.numAttributes()-1;
+				data.setClassIndex(cIndex);
 			}else{
 				data.setClassIndex(classIndex);
 			}
+			
+			//transform numeric to nominal if attribute at class index is
+			//in inappropriate format
+			if(data.firstInstance().attribute(cIndex).isNumeric()){
+				final NumericToNominal filter = new NumericToNominal();
+				//IMPORTANT cIndex+1 ! See method documentation.
+				filter.setAttributeIndices(""+(cIndex+1));
+				filter.setInputFormat(data);
+				data = Filter.useFilter(data, filter);
+			}
 
 			//setup logger
-			Handler fh = new FileHandler("logfile.txt");
+			final Handler fh = new FileHandler("log/logfile.txt");
 			fh.setFormatter(new SimpleFormatter());
 			DataAnalyzer.logger = Logger.getLogger("de.staticline.spatial");
 			DataAnalyzer.logger.addHandler(fh);
 			DataAnalyzer.logger.setLevel(Level.ALL);
-		}catch(Exception exception){
+		}catch(final Exception exception){
 			exception.printStackTrace();
 		}
 	}
@@ -88,7 +96,7 @@ public class DataAnalyzer implements Runnable {
 	 */
 	@Override
 	public void run() {
-
+		//TODO: used for hpo
 	}
 
 	/*
@@ -126,56 +134,30 @@ public class DataAnalyzer implements Runnable {
 	 * default parameters for each classification engine; true: currently
 	 * not implemented
 	 */
-	public void trainClassifiers(int classificationEngine, boolean hpo){
+	public void trainClassifiers(final EClassifiers classificationEngine, final boolean hpo){
 		try{
-			switch(classificationEngine){
-			case 0:
-				classifier = new NaiveBayes();
-				break;
-			case 1:
-				classifier = new Logistic();
-				break;
-			case 2:
-				classifier = new RBFNetwork();
-				break;
-			case 3:
-				classifier = new SMO();
-				break;
-			case 4:
-				classifier = new IBk();
-				break;
-			case 5:
-				classifier = new AdaBoostM1();
-				break;
-			case 6:
-				classifier = new Bagging();
-				break;
-			case 7:
-				classifier = new J48();
-				break;
-			default:
-				System.err.println("Unsupported classification engine choosen.");
-				DataAnalyzer.logger.warning("Unsupported classification engine choosen.");
-				break;
-			}
-			//trigger hpo
+			classifier = classificationEngine.getInstance();
+			
+			//hpo on/off
 			if(hpo){
 				//TODO: hyper parameter optimization
 				//classifier.setOptions(Utils.splitOptions(options));
 			}
-
-			//some output
-			String log = "Running "+classifier.getClass().toString()+"with default options: ";
-			for(String option : classifier.getOptions()){
+			
+			//log
+			String log = "Running "+classifier.getClass().toString()+" with options: ";
+			for(final String option : classifier.getOptions()){
 				log += option+" ";
 			}
 			DataAnalyzer.logger.config(log);
-
+			System.out.println(log);
+			
+			//build data
 			classifier.buildClassifier(data);
-		}catch(UnsupportedAttributeTypeException exception){
+		}catch(final UnsupportedAttributeTypeException exception){
 			//exception.printStackTrace();
 			DataAnalyzer.logger.warning(classifier.getClass()+" can't handle numeric class attributes");
-		}catch(Exception exception){
+		}catch(final Exception exception){
 			exception.printStackTrace();
 		}
 	}
