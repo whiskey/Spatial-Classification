@@ -30,5 +30,9 @@ public class DataFileFilter implements FilenameFilter {
 		else
 			return false;
 	}
+	
+	public String getAllowedExtension(){
+	    return allowedExtension;
+	}
 
 }
