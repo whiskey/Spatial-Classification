@@ -6,6 +6,7 @@
 .checkstyle
 logfile.*
 *.arff
+weka-src.jar
 
 ## folders
 bin

@@ -55,12 +55,8 @@ public class TaskManager {
             }
         }
         logger.log(Level.FINER, "============== "+
-                "Starting task 1. "+getJobs().size()+" jobs in queue."+
+                "Starting task 1: "+getJobs().size()+" jobs in queue"+
                 " ==============");
-        
-        //debug
-//        final DataAnalyzer da = setupJob(EDataSets.POROSITY, EClassifiers.LOGISTIC, false);
-//        jobs.add(da);
         
         startJobs();
     }
@@ -130,8 +126,7 @@ public class TaskManager {
     
     
     private class Worker extends Thread{
-        public Worker() {
-        }
+        public Worker() {}
 
         @Override
         public void run(){

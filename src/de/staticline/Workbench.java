@@ -1,5 +1,6 @@
 package de.staticline;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
@@ -8,6 +9,7 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 import de.staticline.analyze.TaskManager;
+import de.staticline.data.GeoEASManager;
 
 
 
@@ -25,17 +27,29 @@ public class Workbench {
 	    setupLogger();
 	    
 		//--- convert data files to arff
-//		final GeoEASManager geom = new GeoEASManager();
-//		geom.convertAllFilesToARFF();
+		final GeoEASManager geom = new GeoEASManager();
+		geom.convertAllFilesToARFF();
 		
 		//--- anylyze data
 	    final TaskManager tm = TaskManager.getInstance();
 	    tm.doTask1();
 	}
 	
+	/**
+	 * Initializes general logger instance for this project.
+	 * Level is set to 'ALL'.
+	 * 
+	 * @see Logger
+	 * @see Level  
+	 */
 	private static void setupLogger(){
-	    //setup logger
         try {
+            //create log folder
+            final File logFolder = new File("log");
+            if(!logFolder.exists()){
+                logFolder.mkdir();
+            }
+            //setup logger
             final Handler fh = new FileHandler("log/logfile.txt");
             fh.setFormatter(new SimpleFormatter());
             final Logger log = Logger.getLogger("de.staticline.spatial");
