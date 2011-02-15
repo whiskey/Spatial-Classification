@@ -11,15 +11,12 @@ import java.util.logging.SimpleFormatter;
 import de.staticline.analyze.TaskManager;
 import de.staticline.data.GeoEASManager;
 
-
-
-
 /**
- * Quick and dirty testing and deveopent class
+ * Start the work...
  * 
  * @author Carsten Witzke
  */
-public class Workbench {
+public class Start {
 	private static final String ROOT_PATH = System.getProperty("user.dir");
 	private static final String ARFF_PATH = ROOT_PATH + "/data/arff";
 	
