@@ -24,6 +24,16 @@ public class GeoEASManager{
 	
 	
 	/**
+	 * Constructor creates arff-folder if needed.
+	 */
+	public GeoEASManager(){
+	    final File arffFolder = new File(ARFF_PATH);
+	    if(!arffFolder.exists()){
+	        arffFolder.mkdirs();
+	    }
+	}
+	
+	/**
 	 * Converts all files with the default extension (<code>.dat</code>)
 	 * to their ARFF equivalents.
 	 */
