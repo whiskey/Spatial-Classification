@@ -1,6 +1,5 @@
 package de.staticline;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
@@ -8,10 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-import de.staticline.analyze.DataAnalyzer;
-import de.staticline.analyze.EClassifiers;
-import de.staticline.analyze.EDataSets;
-import de.staticline.data.DataFileFilter;
+import de.staticline.analyze.TaskManager;
 
 
 
@@ -32,18 +28,9 @@ public class Workbench {
 //		final GeoEASManager geom = new GeoEASManager();
 //		geom.convertAllFilesToARFF();
 		
-		
 		//--- anylyze data
-		for(final File f : new File(ARFF_PATH).listFiles(new DataFileFilter("arff"))){
-			final DataAnalyzer da = new DataAnalyzer(f.getAbsolutePath());
-			for(final EClassifiers c : EClassifiers.values()){
-				da.filterDataSet(EDataSets.POLLUTION_1);
-				da.trainClassifiers(c, false);
-			}
-		}
-		
-		//--- done
-		System.out.println("### done. ###");
+	    final TaskManager tm = TaskManager.getInstance();
+	    tm.doTask1();
 	}
 	
 	private static void setupLogger(){

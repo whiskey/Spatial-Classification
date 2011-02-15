@@ -1,8 +1,11 @@
 package de.staticline.analyze;
 
+import java.util.Random;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -19,11 +22,14 @@ import weka.filters.unsupervised.attribute.Remove;
  * 
  * @author Carsten Witzke
  */
-public class DataAnalyzer implements Runnable {
-	private Instances 		data;
-	private DataSource 		source;
-	private String			dataURL;
-	private static Logger logger = Logger.getLogger("de.staticline.spatial");
+public class DataAnalyzer {
+    private DataSource     source;
+    private String		   dataURL;
+	private Instances 	   data;
+	private EDataSets      dataSet;
+	private Classifier     classifier;
+	private boolean        hpoEnabled = false;
+	private static Logger  logger = Logger.getLogger("de.staticline.spatial");
 
 	/**
 	 * Which is the class index of the data source?
@@ -34,70 +40,56 @@ public class DataAnalyzer implements Runnable {
 	
 	
 	/**
-	 * Uses the default class-index of an arff: the last attribute.
+	 * Fetches data at the given url and prepares it for the given tasks.
      * @param dataFileURL String to a Weka data-source. 
      * Could be 'arff', 'csv', ...
+     * @param set the used data set. According to the task data sets are
+     * handled different (split, remove columns).
 	 */
-	public DataAnalyzer(final String dataFileURL){
+	public DataAnalyzer(final String dataFileURL, final EDataSets set){
 		try{
 			dataURL = dataFileURL;
+			dataSet = set;
+			
 			source = new DataSource(dataURL);
 			data = source.getDataSet();
+			data.setClassIndex(data.numAttributes()-1);
+			
+			filterDataSet();
 		}catch(final Exception exception){
 			exception.printStackTrace();
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Runnable#run()
-	 */
-	@Override
-	public void run() {
-		//TODO: used for hpo
-	}
-
-	/**
-	 * Trains a classifier with a previously loaded data set.
-	 * @param cl the classification algorithm
-	 * @param hpo - hyper parameter optimization enabled? false: use Weka's
-	 * default parameters for each classification engine; true: currently
-	 * not implemented
-	 * 
-	 * @see EClassifiers
-	 */
-	public void trainClassifiers(final EClassifiers cl, final boolean hpo){
-	    final Classifier classifier = cl.getInstance();
-		try{
-			//TODO: hyper parameter optimization
-			
-			//log
-			String log = "Running "+classifier.getClass().toString() +
-				" with options: ";
-			for(final String option : classifier.getOptions()){
-				log += option+" ";
-			}
-			DataAnalyzer.logger.config(log);
-			System.out.println(log);
-			
-			//build data
-			classifier.buildClassifier(data);
-		}catch(final UnsupportedAttributeTypeException exception){
-			//exception.printStackTrace();
-			DataAnalyzer.logger.warning(classifier.getClass() +
-					" can't handle numeric class attributes");
-		}catch(final Exception exception){
-			exception.printStackTrace();
-		}
+	public void start() {
+		trainClassifier();
+		evaluateClassifier();
 	}
 	
 	/**
-	 * Filters the complete data sets for the given tasks.
-	 * @param set
+	 * Set classification algorithm.
+	 * @param c
 	 */
-	public void filterDataSet(final EDataSets set){
+	public void setClassifier(final EClassifiers c){
+	    classifier = c.getInstance();
+	}
+	
+	/**
+	 * Set hyper-parameter optimization enabled or disabled.
+	 * @param value
+	 */
+	public void setHPO(final boolean value){
+	    hpoEnabled = value;
+	}
+
+	/**
+	 * Pre-filters the current data sets for the given tasks.
+	 * @param set the used data set
+	 */
+	private void filterDataSet(){
 		//filter unused columns
 	    try {
-    		switch (set) {
+    		switch (dataSet) {
     		case POROSITY:
     		    final Remove remove = new Remove();
     		    remove.setInputFormat(data);
@@ -108,13 +100,12 @@ public class DataAnalyzer implements Runnable {
     			break;
     		}
 		} catch (final Exception exception) {
-			DataAnalyzer.logger.warning(
-					"Error during column removal! " + exception.toString());
-			exception.printStackTrace();
+			logger.log(Level.WARNING,
+					"Error during column removal! ", exception);
 		}
 		
 		//handle pollution data
-		switch (set) {
+		switch (dataSet) {
 		case POLLUTION_1:
 			defineClass(382);
 			break;
@@ -174,4 +165,56 @@ public class DataAnalyzer implements Runnable {
 			}
 		}
 	}
+	
+	/**
+     * Trains a classifier with a previously loaded data set.
+     * 
+     * @param hpo - hyper parameter optimization enabled? false: use Weka's
+     * default parameters for each classification engine; true: currently
+     * not implemented
+     * @see EClassifiers
+     */
+    private void trainClassifier(){
+        try{
+            //log
+            String log = "Running "+classifier.getClass() +
+                " with options: ";
+            for(final String option : classifier.getOptions()){
+                log += option+" ";
+            }
+            log += "on data set " + dataSet;
+            logger.log(Level.FINER,log);
+            
+            //build model
+            //TODO: hyper parameter optimization
+            classifier.buildClassifier(data);
+            log = "Done with "+classifier.getClass() +
+                " on " + dataSet;
+            logger.log(Level.FINER, log);
+        }catch(final UnsupportedAttributeTypeException exception){
+            logger.log(Level.WARNING, classifier.getClass() +
+                    " can't handle numeric class attributes");
+        }catch(final Exception exception){
+            final String log = "Error during classifier training!\n" +
+                "  Data set: " + dataSet + "\n  Classifier: " + 
+                classifier.getClass();
+            logger.log(Level.WARNING,log, exception);
+        }
+    }
+    
+    /**
+     * Evaluate current model with 4-fold validation.
+     */
+    private void evaluateClassifier(){
+        try {
+            final Evaluation eval = new Evaluation(data);
+            eval.crossValidateModel(classifier, data, 4, new Random(System.currentTimeMillis()));
+            System.out.println(eval.toSummaryString());
+        } catch (final Exception exception) {
+            final String log = "Error during classifier evaluation!\n" +
+            "  Data set: " + dataSet + "\n  Classifier: " + 
+            classifier.getClass();
+        logger.log(Level.WARNING,log, exception);
+        }
+    }
 }

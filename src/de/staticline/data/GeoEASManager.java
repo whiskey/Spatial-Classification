@@ -78,7 +78,7 @@ public class GeoEASManager{
 				if(tokens != numAttributes.intValue()){
 					System.out.println(	"Invalid data format? I have "+numAttributes+
 							" but got "+tokens+" tokens. Skipping file!");
-					GeoEASManager.logger.log(Level.SEVERE, 
+					logger.log(Level.SEVERE, 
 							"Invalid file structure in file "+dataFile.getAbsolutePath());
 					return;
 				}

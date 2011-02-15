@@ -6,8 +6,19 @@ package de.staticline.analyze;
  * @author Carsten Witzke
  */
 public enum EDataSets {
-	POROSITY,
-	SOILS,
-	POLLUTION_1,
-	POLLUTION_2;
+	POROSITY("Porosity"),
+	SOILS("Soils"),
+	POLLUTION_1("Pollution 1"),
+	POLLUTION_2("Pollution 2");
+	
+	private String name;
+	
+	private EDataSets(final String name){
+	    this.name = name;
+	}
+	
+	@Override
+    public String toString(){
+	    return name;
+	}
 }
