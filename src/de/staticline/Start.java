@@ -17,9 +17,6 @@ import de.staticline.data.GeoEASManager;
  * @author Carsten Witzke
  */
 public class Start {
-	private static final String ROOT_PATH = System.getProperty("user.dir");
-	private static final String ARFF_PATH = ROOT_PATH + "/data/arff";
-	
 	public static void main(final String[] args) {
 	    setupLogger();
 	    

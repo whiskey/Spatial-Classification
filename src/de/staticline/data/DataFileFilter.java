@@ -27,8 +27,7 @@ public class DataFileFilter implements FilenameFilter {
 	public boolean accept(final File dir, final String name) {
 		if(name.endsWith("."+allowedExtension))
 			return true;
-		else
-			return false;
+		return false;
 	}
 	
 	public String getAllowedExtension(){

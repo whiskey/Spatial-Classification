@@ -28,6 +28,7 @@ public class DataAnalyzer {
 	private Instances 	   data;
 	private EDataSets      dataSet;
 	private Classifier     classifier;
+	@SuppressWarnings("unused") //currently not used
 	private boolean        hpoEnabled = false;
 	private static Logger  logger = Logger.getLogger("de.staticline.spatial");
 

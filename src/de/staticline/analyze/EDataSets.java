@@ -13,8 +13,8 @@ public enum EDataSets {
 	
 	private String name;
 	
-	private EDataSets(final String name){
-	    this.name = name;
+	private EDataSets(final String n){
+	    this.name = n;
 	}
 	
 	@Override
