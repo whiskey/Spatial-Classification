@@ -27,6 +27,8 @@ public class Start {
 		//--- anylyze data
 	    final TaskManager tm = TaskManager.getInstance();
 	    tm.doTask1();
+	    tm.doTask2();
+	    tm.doTask3();
 	}
 	
 	/**

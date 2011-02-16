@@ -23,14 +23,16 @@ import weka.filters.unsupervised.attribute.Remove;
  * @author Carsten Witzke
  */
 public class DataAnalyzer {
-    private DataSource     source;
-    private String		   dataURL;
-	private Instances 	   data;
-	private EDataSets      dataSet;
-	private Classifier     classifier;
-	@SuppressWarnings("unused") //currently not used
-	private boolean        hpoEnabled = false;
-	private static Logger  logger = Logger.getLogger("de.staticline.spatial");
+    private DataSource         source;
+    private String		       dataURL;
+	private Instances 	       data;
+	private EDataSets          dataSet;
+	private Classifier         classifier;
+	@SuppressWarnings("unused")
+	private boolean            hpoEnabled = false;//currently not used
+	private static Logger      logger = Logger.getLogger("de.staticline.spatial");
+	//parameters
+	private static final int   NUM_FOLDS = 4;
 
 	/**
 	 * Which is the class index of the data source?
@@ -209,8 +211,14 @@ public class DataAnalyzer {
     private void evaluateClassifier(){
         try {
             final Evaluation eval = new Evaluation(data);
-            eval.crossValidateModel(classifier, data, 4, new Random(System.currentTimeMillis()));
+            eval.crossValidateModel(classifier, data, 
+                    NUM_FOLDS, new Random(System.currentTimeMillis()));
+            //TODO create persistent output
+            System.out.println(classifier.getClass());
+            System.out.println(dataSet);
             System.out.println(eval.toSummaryString());
+            System.out.println("--------------------------------------------");
+            
         } catch (final Exception exception) {
             final String log = "Error during classifier evaluation!\n" +
             "  Data set: " + dataSet + "\n  Classifier: " + 

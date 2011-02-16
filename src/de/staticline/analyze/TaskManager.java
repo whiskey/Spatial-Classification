@@ -25,14 +25,9 @@ public class TaskManager {
     private static final String ROOT_PATH = System.getProperty("user.dir");
     private static final String ARFF_PATH = ROOT_PATH + "/data/arff";
     //queue
-    //private static SynchronousQueue<DataAnalyzer> jobs = new SynchronousQueue<DataAnalyzer>();
     private static Queue<DataAnalyzer> jobs = new LinkedList<DataAnalyzer>();
     
 
-    protected TaskManager(){
-        //
-    }
-    
     /**
      * Get the TaskManager.
      * @return the only instance of TaskManager
@@ -44,7 +39,9 @@ public class TaskManager {
         return instance;
     }
     
-    
+    /**
+     * Multiple data sets and classifiers.
+     */
     public void doTask1(){
         final EDataSets[] SET_1 = 
             {EDataSets.POROSITY, EDataSets.SOILS, EDataSets.POLLUTION_1};
@@ -59,6 +56,36 @@ public class TaskManager {
                 " ==============");
         
         startJobs();
+    }
+    
+    /**
+     * Subset of all classifiers on 'pollution2' data set.
+     */
+    public void doTask2(){
+        final EClassifiers[] cSet = {EClassifiers.LOGISTIC, EClassifiers.RBF, 
+                EClassifiers.IBK, EClassifiers.J48};
+        for(final EClassifiers c : cSet){
+            final DataAnalyzer da = 
+                setupJob(EDataSets.POLLUTION_2, c, false);
+            getJobs().add(da);
+        }
+        logger.log(Level.FINER, "============== "+
+                "Starting task 2: "+getJobs().size()+" jobs in queue"+
+                " ==============");
+        
+        startJobs();
+    }
+    
+    /**
+     * Regression analysis of the 'lake' data set.
+     */
+    public void doTask3(){
+        //TODO
+//        logger.log(Level.FINER, "============== "+
+//                "Starting task 3: "+getJobs().size()+" jobs in queue"+
+//                " ==============");
+//        
+//        startJobs();
     }
     
     /**
