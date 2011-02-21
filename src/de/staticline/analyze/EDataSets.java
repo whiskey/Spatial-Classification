@@ -9,7 +9,8 @@ public enum EDataSets {
 	POROSITY("Porosity"),
 	SOILS("Soils"),
 	POLLUTION_1("Pollution 1"),
-	POLLUTION_2("Pollution 2");
+	POLLUTION_2("Pollution 2"),
+	LAKE("Lake");
 	
 	private String name;
 	

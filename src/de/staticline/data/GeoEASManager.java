@@ -20,8 +20,6 @@ public class GeoEASManager{
 	private static final String ROOT_PATH = System.getProperty("user.dir");
 	private static final String DATA_PATH = ROOT_PATH + "/data/raw";
 	private static final String ARFF_PATH = ROOT_PATH + "/data/arff";
-	private static final File dataFolder = new File(DATA_PATH);
-	
 	
 	/**
 	 * Constructor creates arff-folder if needed.
@@ -38,6 +36,7 @@ public class GeoEASManager{
 	 * to their ARFF equivalents.
 	 */
 	public final void convertAllFilesToARFF(){
+		File dataFolder = new File(DATA_PATH);
 		if(dataFolder.isDirectory()){
 			for(final File file : dataFolder.listFiles(new DataFileFilter())){
 				convertToARFF(file);
@@ -51,7 +50,7 @@ public class GeoEASManager{
 	 */
 	public void convertToARFF(final File dataFile){
 		try{
-		    System.out.println("Convert "+dataFile.getCanonicalPath());
+		    //System.out.println("Convert "+dataFile.getCanonicalPath());
 			//read the file
 			final FileInputStream fis = new FileInputStream(dataFile);
 			final InputStreamReader in = new InputStreamReader(fis);
@@ -108,7 +107,7 @@ public class GeoEASManager{
 			//finish
 			bwriter.close();
 			//stats
-			System.out.println(dataFile.getName()+" data rows:  "+numDataRows);
+			//System.out.println(dataFile.getName()+" data rows:  "+numDataRows);
 		}catch(final Exception exception){
 			exception.printStackTrace();
 		}

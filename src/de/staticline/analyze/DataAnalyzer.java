@@ -30,6 +30,7 @@ public class DataAnalyzer {
 	private Classifier         classifier;
 	@SuppressWarnings("unused")
 	private boolean            hpoEnabled = false;//currently not used
+	private Eval			   eval;
 	private static Logger      logger = Logger.getLogger("de.staticline.spatial");
 	//parameters
 	private static final int   NUM_FOLDS = 4;
@@ -67,6 +68,10 @@ public class DataAnalyzer {
 	public void start() {
 		trainClassifier();
 		evaluateClassifier();
+	}
+	
+	public Eval getEval(){
+		return eval;
 	}
 	
 	/**
@@ -189,7 +194,7 @@ public class DataAnalyzer {
             logger.log(Level.FINER,log);
             
             //build model
-            //TODO: hyper parameter optimization
+            //TODO: hyper-parameter optimization
             classifier.buildClassifier(data);
             log = "Done with "+classifier.getClass() +
                 " on " + dataSet;
@@ -210,15 +215,11 @@ public class DataAnalyzer {
      */
     private void evaluateClassifier(){
         try {
-            final Evaluation eval = new Evaluation(data);
-            eval.crossValidateModel(classifier, data, 
+            Evaluation evaluation = new Evaluation(data);
+            evaluation.crossValidateModel(classifier, data, 
                     NUM_FOLDS, new Random(System.currentTimeMillis()));
-            //TODO create persistent output
-            System.out.println(classifier.getClass());
-            System.out.println(dataSet);
-            System.out.println(eval.toSummaryString());
-            System.out.println("--------------------------------------------");
-            
+            eval = new Eval(classifier.getClass().toString(), evaluation, 
+            		classifier.getOptions());
         } catch (final Exception exception) {
             final String log = "Error during classifier evaluation!\n" +
             "  Data set: " + dataSet + "\n  Classifier: " + 

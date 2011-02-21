@@ -1,9 +1,12 @@
 package de.staticline.analyze;
 
+import java.io.File;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import de.staticline.data.Exporter;
 
 /**
  * Singleton manager for the given tasks:
@@ -18,12 +21,13 @@ import java.util.logging.Logger;
  * @author Carsten Witzke
  */
 public class TaskManager {
-    private static TaskManager instance = null;
-    //log
-    private static Logger logger = Logger.getLogger("de.staticline.spatial");
+	private static TaskManager instance = null;
     //paths
     private static final String ROOT_PATH = System.getProperty("user.dir");
     private static final String ARFF_PATH = ROOT_PATH + "/data/arff";
+    //log + output
+    private static Logger logger = Logger.getLogger("de.staticline.spatial");
+    private Exporter evalExport;
     //queue
     private static Queue<DataAnalyzer> jobs = new LinkedList<DataAnalyzer>();
     
@@ -42,7 +46,7 @@ public class TaskManager {
     /**
      * Multiple data sets and classifiers.
      */
-    public void doTask1(){
+    public void doTask1(String outputURL){
         final EDataSets[] SET_1 = 
             {EDataSets.POROSITY, EDataSets.SOILS, EDataSets.POLLUTION_1};
         for(final EDataSets set : SET_1){
@@ -54,14 +58,14 @@ public class TaskManager {
         logger.log(Level.FINER, "============== "+
                 "Starting task 1: "+getJobs().size()+" jobs in queue"+
                 " ==============");
-        
+        setExporter(outputURL, getJobs().size());
         startJobs();
     }
     
     /**
      * Subset of all classifiers on 'pollution2' data set.
      */
-    public void doTask2(){
+    public void doTask2(String outputURL){
         final EClassifiers[] cSet = {EClassifiers.LOGISTIC, EClassifiers.RBF, 
                 EClassifiers.IBK, EClassifiers.J48};
         for(final EClassifiers c : cSet){
@@ -72,20 +76,26 @@ public class TaskManager {
         logger.log(Level.FINER, "============== "+
                 "Starting task 2: "+getJobs().size()+" jobs in queue"+
                 " ==============");
-        
+        setExporter(outputURL, getJobs().size());
         startJobs();
     }
     
     /**
      * Regression analysis of the 'lake' data set.
      */
-    public void doTask3(){
-        //TODO
-//        logger.log(Level.FINER, "============== "+
-//                "Starting task 3: "+getJobs().size()+" jobs in queue"+
-//                " ==============");
-//        
-//        startJobs();
+    public void doTask3(String outputURL){
+//    	final EClassifiers[] cSet = {EClassifiers.};
+//        for(final EClassifiers c : cSet){
+//            final DataAnalyzer da = 
+//                setupJob(EDataSets.LAKE, c, false);
+//            getJobs().add(da);
+//        }
+    	
+        logger.log(Level.FINER, "============== "+
+                "Starting task 3: "+getJobs().size()+" jobs in queue"+
+                " ==============");
+        setExporter(outputURL, getJobs().size());
+        startJobs();
     }
     
     /**
@@ -128,8 +138,6 @@ public class TaskManager {
         return da;
     }
     
-    
-    
     /**
      * Currently only quick and dirty start of all jobs in queue.
      */
@@ -150,15 +158,43 @@ public class TaskManager {
         return jobs;
     }
 
-    
-    
-    private class Worker extends Thread{
+    /**
+     * Creates a new Exporter whose output will be written to the given URL.
+     * Missing folders will be created on the fly. Currently the given file
+     * extension has no effect on the export function. It is possible to give
+     * an extension <code>.xml</code> and call afterwards 
+     * <code>Exporter.exportCSV()</code>.
+     *  
+     * @param out the URL-String to the output file, e.g. 
+     * <code>./output/eval.csv</code>
+     * @see Exporter
+     */
+	private void setExporter(String out, int rows) {
+		File output = new File(out);
+		if(!output.getParentFile().exists()){
+			output.getParentFile().mkdirs();
+		}
+		evalExport = new Exporter(output, rows);
+		evalExport.start();
+	}
+
+	/**
+	 * @return the Exporter
+	 */
+	public Exporter getExporter() {
+		return evalExport;
+	}
+
+
+	private class Worker extends Thread{
         public Worker() {}
 
         @Override
         public void run(){
             while(getJobs().peek() != null){
-                getJobs().poll().start();
+                DataAnalyzer da = getJobs().poll();
+                da.start();
+                getExporter().addJob(da.getEval());
             }
         }
     }

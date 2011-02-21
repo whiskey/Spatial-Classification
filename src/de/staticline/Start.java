@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 import de.staticline.analyze.TaskManager;
-import de.staticline.data.GeoEASManager;
 
 /**
  * Start the work...
@@ -17,18 +16,21 @@ import de.staticline.data.GeoEASManager;
  * @author Carsten Witzke
  */
 public class Start {
+    private static final String ROOT_PATH = System.getProperty("user.dir");
+    private static final String OUTPUT_PATH = ROOT_PATH + "/output";
+    private static final TaskManager TM = TaskManager.getInstance();
+    
 	public static void main(final String[] args) {
 	    setupLogger();
 	    
 		//--- convert data files to arff
-		final GeoEASManager geom = new GeoEASManager();
-		geom.convertAllFilesToARFF();
+//		final GeoEASManager geom = new GeoEASManager();
+//		geom.convertAllFilesToARFF();
 		
 		//--- anylyze data
-	    final TaskManager tm = TaskManager.getInstance();
-	    tm.doTask1();
-	    tm.doTask2();
-	    tm.doTask3();
+	    TM.doTask1(OUTPUT_PATH+"/eval_1.csv");
+	    TM.doTask2(OUTPUT_PATH+"/eval_2.csv");
+	    TM.doTask3(OUTPUT_PATH+"/eval_3.csv");
 	}
 	
 	/**
