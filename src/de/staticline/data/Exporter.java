@@ -88,19 +88,26 @@ public class Exporter extends Thread{
 			.append(eval.evaluation.pctIncorrect()).append(",");
 			//for regression
 			result.append(eval.evaluation.relativeAbsoluteError()).append(",");
-			double[][] matrix = eval.evaluation.confusionMatrix();
-			result.append("(");
-			for(int i=0; i<matrix.length; i++){
+			try{
+				double[][] matrix = eval.evaluation.confusionMatrix();
 				result.append("(");
-				for(int j=0; j<matrix[i].length; j++){
-					result.append(matrix[i][j]).append(" ");
+				for(int i=0; i<matrix.length; i++){
+					result.append("(");
+					for(int j=0; j<matrix[i].length; j++){
+						result.append(matrix[i][j]).append(" ");
+					}
+					result.append(")");
 				}
-				result.append(")");
+				result.append("),");
+			}catch(Exception exception){
+				result.append(",");
+				//Hey Weka-guys, it's possible to define OWN exceptions!
 			}
-			result.append("),");
 			for(String opt : eval.options){
 				result.append(opt).append(" ");
 			}
+			result.append("\n");
+			
 			//System.out.println(result);
 			bw.write(result.toString());
 			written++;

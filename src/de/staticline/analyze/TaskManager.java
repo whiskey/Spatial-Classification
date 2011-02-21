@@ -84,12 +84,12 @@ public class TaskManager {
      * Regression analysis of the 'lake' data set.
      */
     public void doTask3(String outputURL){
-//    	final EClassifiers[] cSet = {EClassifiers.};
-//        for(final EClassifiers c : cSet){
-//            final DataAnalyzer da = 
-//                setupJob(EDataSets.LAKE, c, false);
-//            getJobs().add(da);
-//        }
+    	final ERegressionSchemes[] cSet = ERegressionSchemes.values();
+        for(final ERegressionSchemes c : cSet){
+            final DataAnalyzer da = 
+                setupJob(EDataSets.LAKE, c, false);
+            getJobs().add(da);
+        }
     	
         logger.log(Level.FINER, "============== "+
                 "Starting task 3: "+getJobs().size()+" jobs in queue"+
@@ -133,7 +133,38 @@ public class TaskManager {
                 break;
         }
         final DataAnalyzer da = new DataAnalyzer(ARFF_PATH+"/"+fileName, set);
-        da.setClassifier(c);
+        da.setClassifier(c.getInstance());
+        da.setHPO(hpo);
+        return da;
+    }
+  
+    /**
+     * Initializes a DataAnalyzer with all data needed to prepare the data
+     * of a given data set.
+     * @param set the data set to be used
+     * @param c the regression scheme used in this job
+     * @param hpo hyper-parameter optimization enabled?
+     * @return the DataAnalyzer to be used in a thread
+     * 
+     * @see DataAnalyzer
+     * @see EDataSets
+     * @see ERegressionSchemes
+     */
+    private DataAnalyzer setupJob(
+            final EDataSets set, 
+            final ERegressionSchemes c, 
+            final boolean hpo){
+        String fileName = "";
+        switch (set) {
+            case LAKE:
+                fileName = "Lake.arff";
+                break;
+            default:
+                System.err.println("unsupported data set");
+                break;
+        }
+        final DataAnalyzer da = new DataAnalyzer(ARFF_PATH+"/"+fileName, set);
+        da.setClassifier(c.getInstance());
         da.setHPO(hpo);
         return da;
     }

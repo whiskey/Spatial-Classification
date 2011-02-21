@@ -29,7 +29,7 @@ public class DataAnalyzer {
 	private EDataSets          dataSet;
 	private Classifier         classifier;
 	@SuppressWarnings("unused")
-	private boolean            hpoEnabled = false;//currently not used
+	private boolean            hpoEnabled = false;//TODO: hpo
 	private Eval			   eval;
 	private static Logger      logger = Logger.getLogger("de.staticline.spatial");
 	//parameters
@@ -78,8 +78,8 @@ public class DataAnalyzer {
 	 * Set classification algorithm.
 	 * @param c
 	 */
-	public void setClassifier(final EClassifiers c){
-	    classifier = c.getInstance();
+	public void setClassifier(Classifier c){
+	    classifier = c;
 	}
 	
 	/**
@@ -112,7 +112,7 @@ public class DataAnalyzer {
 					"Error during column removal! ", exception);
 		}
 		
-		//handle pollution data
+		//split pollution data
 		switch (dataSet) {
 		case POLLUTION_1:
 			defineClass(382);
@@ -125,7 +125,14 @@ public class DataAnalyzer {
 		}
 		
 		//convert attributes if needed
-		convertClassIndexToNominal();
+		switch(dataSet) {
+		case LAKE:
+			//no conversion here
+			break;
+		default:
+			convertClassIndexToNominal();
+			break;
+		}
 	}
 	
 	/**
@@ -194,7 +201,7 @@ public class DataAnalyzer {
             logger.log(Level.FINER,log);
             
             //build model
-            //TODO: hyper-parameter optimization
+            //TODO: hyper-parameter optimization here
             classifier.buildClassifier(data);
             log = "Done with "+classifier.getClass() +
                 " on " + dataSet;
