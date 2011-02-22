@@ -10,12 +10,21 @@ import weka.classifiers.Evaluation;
  */
 public class Eval{
 	public String classifier;
+	public EDataSets dataSet;
 	public Evaluation evaluation;
 	public String[] options;
 	
-	public Eval(String n, Evaluation e, String[] o){
-		this.classifier = n;
-		this.evaluation = e;
-		this.options = o;
+	/**
+	 * Create and fill a new Eval-container
+	 * @param cName classifier Name
+	 * @param dSet the used data set
+	 * @param eval the Evaluation 
+	 * @param opt (Weka) options
+	 */
+	public Eval(String cName, EDataSets dSet, Evaluation eval, String[] opt){
+		this.classifier = cName;
+		this.dataSet = dSet;
+		this.evaluation = eval;
+		this.options = opt;
 	}
 }

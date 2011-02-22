@@ -111,7 +111,6 @@ public class DataAnalyzer {
 			logger.log(Level.WARNING,
 					"Error during column removal! ", exception);
 		}
-		
 		//split pollution data
 		switch (dataSet) {
 		case POLLUTION_1:
@@ -123,7 +122,6 @@ public class DataAnalyzer {
 		default:
 			break;
 		}
-		
 		//convert attributes if needed
 		switch(dataSet) {
 		case LAKE:
@@ -218,15 +216,15 @@ public class DataAnalyzer {
     }
     
     /**
-     * Evaluate current model with 4-fold validation.
+     * Evaluate current model with n-fold validation.
      */
     private void evaluateClassifier(){
         try {
             Evaluation evaluation = new Evaluation(data);
             evaluation.crossValidateModel(classifier, data, 
-                    NUM_FOLDS, new Random(System.currentTimeMillis()));
-            eval = new Eval(classifier.getClass().toString(), evaluation, 
-            		classifier.getOptions());
+            		NUM_FOLDS, new Random(System.currentTimeMillis()));
+            eval = new Eval(classifier.getClass().getSimpleName(), dataSet, 
+            		evaluation, classifier.getOptions());
         } catch (final Exception exception) {
             final String log = "Error during classifier evaluation!\n" +
             "  Data set: " + dataSet + "\n  Classifier: " + 

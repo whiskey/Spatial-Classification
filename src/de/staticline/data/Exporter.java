@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.logging.Level;
@@ -23,6 +24,8 @@ public class Exporter extends Thread{
 	private final File outputFile;
 	private FileWriter fw;
 	private BufferedWriter bw;
+	//write process
+	private ArrayList<String> cList = new ArrayList<String>();
 	private int rows;
 	private int written;
 	
@@ -40,23 +43,27 @@ public class Exporter extends Thread{
 	
 	@Override
 	public void run() {
-		logger.log(Level.FINEST, "Starting Exporter for file "+
-				outputFile.getAbsolutePath());
-		while(written < rows){
-			try {
+		try {
+			logger.log(Level.FINEST, "Starting Exporter for file "+
+					outputFile.getAbsolutePath());
+			//header
+			String header = "cName,cID,data set,% correct,% incorrect,"+
+				"abs. error,confusion matrix,options\n";
+			bw.write(header);
+			while(written < rows){
 				if(evalQueue.peek() != null)
 					exportCSV(evalQueue.poll());
 				sleep(500);
-			} catch (InterruptedException exception) {
-				exception.printStackTrace();
-			}
-        }
-		//let the writer do his job
-		try {
+	        }
+			//let the writer do his job
 			bw.flush();
 			bw.close();
 		} catch (IOException exception) {
-			exception.printStackTrace();
+			logger.log(Level.WARNING, "File error while writing "+
+					outputFile.getAbsolutePath(), exception);
+		} catch (InterruptedException exception) {
+			logger.log(Level.WARNING, "Thread error while writing "+
+					outputFile.getAbsolutePath(), exception);
 		}
 	}
 	
@@ -69,6 +76,8 @@ public class Exporter extends Thread{
 	 * will be overwritten. Format is:
 	 * <ol>
 	 * <li>class name classifier</li>
+	 * <li>classifier index (sequence #)</li>
+	 * <li>data set</li>
 	 * <li>% correct</li>
 	 * <li>% incorrect</li>
 	 * <li>relative absolute error</li>
@@ -82,8 +91,14 @@ public class Exporter extends Thread{
 	 */
 	public void exportCSV(Eval eval){
 		try {
+			if(cList.indexOf(eval.classifier) == -1){
+				cList.add(eval.classifier);
+			}
+			//data
 			StringBuilder result = new StringBuilder();
 			result.append(eval.classifier).append(",")
+			.append(cList.indexOf(eval.classifier)).append(",")
+			.append(eval.dataSet).append(",")
 			.append(eval.evaluation.pctCorrect()).append(",")
 			.append(eval.evaluation.pctIncorrect()).append(",");
 			//for regression
@@ -107,11 +122,8 @@ public class Exporter extends Thread{
 				result.append(opt).append(" ");
 			}
 			result.append("\n");
-			
-			//System.out.println(result);
 			bw.write(result.toString());
 			written++;
-			//System.out.println(written+"/"+rows);
 		} catch (Exception exception) {
 			exception.printStackTrace();
 		}
