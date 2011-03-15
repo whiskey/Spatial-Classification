@@ -28,9 +28,19 @@ public class Start {
 //		geom.convertAllFilesToARFF();
 		
 		//--- anylyze data
+	    System.out.print("Running task 1 ");
 	    TM.doTask1(OUTPUT_PATH+"/eval_1.csv");
+	    System.out.println("- done.");
+	    
+	    System.out.print("Running task 2 ");
 	    TM.doTask2(OUTPUT_PATH+"/eval_2.csv");
+	    System.out.println("- done.");
+	    
+	    System.out.print("Running task 3 ");
 	    TM.doTask3(OUTPUT_PATH+"/eval_3.csv");
+	    System.out.println("- done.");
+	    
+	    System.out.println("Finished.");
 	}
 	
 	/**
